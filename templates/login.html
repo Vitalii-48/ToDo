@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h2>Вхід</h2>
+    <form method="POST">
+        <label for="username">Логін:</label>
+        <input type="text" id="username" name="username" ><br><br>
+
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" ><br><br>
+
+        <button type="submit">Увійти</button>
+    </form>
+    {% if message_html %}
+        <p class="error-message">{{ message_html }}</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Привіт {{user}}</h1>
+    <h2>Список завдань:</h2>
+    <ol>
+        {% for item in todo_list %}
+            <li>{{ item }}</li><br>
+        {% endfor %}
+    </ol>
+
+</body>
+</html>
