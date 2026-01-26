@@ -1,0 +1,25 @@
+<!-- register.html -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Реєстрація</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Реєстрація</h1>
+    <form method="POST">
+        <label for="username">Логін</label>
+        <input type="text" name="username" id="username" placeholder="імя"><br><br>
+        <label for="password">Пароль</label>
+        <input type="password" name="password" id="password" placeholder="пароль"><br><br>
+        <label for="age">Кількість років</label>
+        <input type="age" name="age" id="age" placeholder="ваш вік"><br><br>
+        <button type="submit">Зареєструватися</button>
+    </form>
+
+    {% if message %}
+        <p class="error-message">{{ message }}</p>
+    {% endif %}
+</body>
+</html>

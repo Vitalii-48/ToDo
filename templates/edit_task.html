@@ -1,0 +1,40 @@
+<!-- edit_task.html -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Редагувати задачу</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h2>Редагування задачі</h2>
+    <form method="POST" class="task-form">
+        <div class="form-section">
+            <h3>Основна інформація</h3>
+            <div class="form-gruop">
+                <label for="description">Опис</label><br>
+                <input type="text" id="description" name="description" value="{{ task[2] }}" required>
+            </div><br>
+            <div class="form-group">
+                <label for="due_at">Дата завершення</label><br>
+                 <input type="date" id="due_at" name="due_at" value="{{ task[4] }}" required>
+            </div>
+        </div>
+        <div class="form-section">
+            <h3>Пріорітет</h3>
+            <div class="form-gruop">
+                <label for="priority">Оберіть рівень</label>
+                <select name="priority">
+                    {% for key, value in priority_map.items() %}
+                        <option value="{{ key }}" {% if task[5] == key %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select><br>
+            </div><br><br>
+        </div>
+        <button type="submit">Зберегти</button>
+    </form>
+    <p><a href="{{ url_for('tasks') }}">Назад до списку</a></p>
+
+
+</body>
+</html>

@@ -1,12 +1,19 @@
+<!-- index.html -->
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Головна</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Привіт {{user}}</h1>
+    <h1>Привіт {{username}}</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <p>{{ messages[0] }}</p>
+        {% endif %}
+    {% endwith %}
     <h2>Список завдань:</h2>
     <ol>
         {% for item in todo_list %}

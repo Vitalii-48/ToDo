@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Вітаю</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Ласково просимо в ToDo Менеджер</h1>
+    <h2>Він допоможе організувати вашу роботу і нічого не пропустити</h2>
+    <h2>Демо список завдань</h2>
+    <ol>
+        <li>Вивчити Flask</li><br>
+        <li>Зробити CRUD</li><br>
+        <li>Створити Telegram‑бота</li>
+    </ol>
+    <h3>Щоб переглядати та керувати своїми завданнями, будь ласка:</h3>
+    <ul>
+        <li><a href="{{ url_for('login') }}">Увійдіть у свій акаунт</a></li>
+        <li><a href="{{ url_for('register') }}">Зареєструйтеся</a> (якщо не маєте акаунта)</li>
+    </ul>
+</body>
+</html>

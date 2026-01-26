@@ -1,3 +1,5 @@
+/* style.css */
+
 h1 {
     color: red;
 }
@@ -10,3 +12,9 @@ h2 {
 .error-message {
     color: red;
     }
+
+.delete_account {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}

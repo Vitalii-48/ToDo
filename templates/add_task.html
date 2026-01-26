@@ -1,0 +1,38 @@
+<!-- add_task -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Додати завдання</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h2>Додати нове завдання</h2>
+    <form method="POST" class="task-form">
+        <div class="form-section">
+            <h3>Основна інформація</h3>
+            <div class="form-gruop">
+                <label for="description">Опис</label><br>
+                <input type="text" id="description" name="description" placeholder="Введіть опис завдання" required>
+            </div><br>
+            <div class="form-gruop">
+                <label for="due_at">Дата завершення</label><br>
+                 <input type="date" id="due_at" name="due_at" required>
+            </div>
+        </div>
+
+        <div class="form-section"></div>
+            <h3>Пріорітет</h3>
+            <div class="form-gruop">
+                <label for="priority">Оберіть рівень</label>
+                <select name="priority">
+                    <option value="1">Низький</option>
+                    <option value="2">Середній</option>
+                    <option value="3"> Високий</option>
+                </select>
+            </div><br><br>
+        <button type="submit">Додати</button>
+    </form>
+    <p><a href="{{ url_for('tasks') }}">Назад до списку</a></p>
+</body>
+</html>
