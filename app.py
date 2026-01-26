@@ -89,7 +89,6 @@ def tasks():
     priority = request.args.get('priority')
 
     todo_list = db.get_filtr_tasks(user_id, status, priority)
-    print(todo_list)
     return render_template(
         'tasks.html',
         todo_list=todo_list,
