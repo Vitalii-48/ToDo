@@ -6,6 +6,7 @@ from datetime import datetime
 import os
 import database as db
 
+from pprint import pprint
 
 load_dotenv()
 
@@ -35,11 +36,32 @@ def login():
         user = db.get_user(username)
         if user and user[2] == password:
             session['username'] = username
+            session['role'] = user[4]
+            if session ['role'] == 'admin':
+                return redirect(url_for('admin_board'))
             return redirect(url_for('tasks'))
         else:
             message = 'Неправильний логін або пароль'
 
     return render_template('login.html', message_html=message)
+
+#
+@app.route("/admin")
+def admin_board():
+    users = db.get_all_users()
+    tasks = db.get_all_tasks()
+    pprint(users)
+    pprint(tasks)
+
+    tasks_by_users = {}
+
+    for user in users:
+        list_tasks = []
+        for task in tasks:
+            list_tasks.append(task) if task[1] == user[0] else None
+        tasks_by_users.setdefault(user[0], list_tasks)
+    pprint(tasks_by_users)
+    return render_template('admin.html', users=users, tasks=tasks_by_users)
 
 #
 @app.route("/register", methods=['GET', 'POST'])
@@ -91,6 +113,7 @@ def tasks():
     todo_list = db.get_filtr_tasks(user_id, status, priority)
     return render_template(
         'tasks.html',
+        username=session['username'],
         todo_list=todo_list,
         priority_map=priority_map,
         status=status,
@@ -136,6 +159,26 @@ def edit_task(task_id):
         return redirect(url_for('tasks'))
     return render_template('edit_task.html', task=task, priority_map=priority_map)
 
+#
+@app.route("/admin/delete_user/<int:user_id>", methods=['POST'])
+def admin_delete_user(user_id):
+    if "username" not in session or session.get("role") != "admin":
+        flash("Доступ заборонено")
+        return redirect(url_for("login"))
 
+    db.delete_user(user_id)
+    flash("Користувач видалений")
+    return redirect(url_for("admin_board"))
+
+#
+@app.route("/admin/delete_task/<int:task_id>", methods=['POST'])
+def admin_delete_task(task_id):
+    if "username" not in session or session.get("role") != "admin":
+        flash("Доступ заборонено")
+        return redirect(url_for("login"))
+
+    db.delete_task(task_id)
+    flash("Задача видалена")
+    return redirect(url_for("admin_board"))
 if __name__ == "__main__":
     app.run(debug=True)

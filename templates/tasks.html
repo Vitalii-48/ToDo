@@ -25,7 +25,7 @@
      </div>
 
     <div style="display: flex; align-items: center; gap:20px;" method="POST">
-        <h1 style="margin: 0;">Список завдань</h1>
+        <h1 style="margin: 0;">Список завдань {{ username }}</h1>
         <a href="{{ url_for('add_task') }}">Додати завдання</a>
         <form method="GET" action="{{ url_for('tasks') }}" style="display:inline">
             <label for="status">Фільтр по статусу</label>
@@ -59,7 +59,7 @@
                     {% else %}
                         <span style="color:yellow;">Задача не виконана</span>
                     {% endif %}
-                </form>
+                </form><br>
                 <a href="{{ url_for('edit_task', task_id=task[0]) }}" style="color:green; margin-right:60px;">Редагувати</a>
                 <a href="{{ url_for('delete_task', task_id=task[0]) }}" style="color: red">Видалити</a>
             </li><br>

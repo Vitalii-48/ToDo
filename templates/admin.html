@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Адміністратор</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h2>Список користувачів</h2>
+    <ol>
+        {% for user in users %}
+            <li style="margin-bottom:30px;">
+                <h3 style="display:inline;">Користувач {{ user[1] }}</h3>
+                <form action="{{ url_for('admin_delete_user', user_id=user[0]) }}" method="POST" style="display:inline; margin-left:40px">
+                    <button type="submit">Видалити користувача</button>
+                </form>
+
+                <h3>Задачі користувача</h3>
+                <ol>
+                    {% for task in tasks.get(user[0], []) %}
+                        <li>
+                            {{ task[2] }}
+                            <form action="{{ url_for('admin_delete_task', task_id=task[0]) }}" method="POST" style="display:inline; margin-left:40px">
+                                <button type="submit">Видалити задачу</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </li>
+        {% endfor %}
+    </ol>
+</body>
+</html>

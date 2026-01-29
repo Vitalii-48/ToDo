@@ -122,3 +122,16 @@ def get_filtr_tasks(user_id, status=None, priority=None):
     conn.close()
     return tasks
 
+#
+def get_all_users():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE role = 'user'")
+    return cursor.fetchall()
+
+#
+def get_all_tasks():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    return cursor.fetchall()
