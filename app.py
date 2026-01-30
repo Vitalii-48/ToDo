@@ -11,7 +11,7 @@ from pprint import pprint
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('secret_key')
+app.secret_key = os.getenv('TD_SECRET_KEY')
 db.init_database()
 
 #
