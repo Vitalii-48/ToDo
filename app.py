@@ -1,4 +1,4 @@
-# app.py
+# main.py
 
 from flask import Flask, redirect, render_template, request, url_for, session, flash
 from dotenv import load_dotenv
