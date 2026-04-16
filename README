@@ -1,17 +1,17 @@
 Flask Task Manager
 
-📌 Опис
+Description
 
-Це веб-додаток на Flask для керування завданнями з підтримкою авторизації, ролей (user / admin), реєстрації, редагування та перегляду завдань. Проєкт реалізує базову логіку керування користувачами та завданнями через шаблони HTML та SQLite-базу.
+This is a Flask web application for task management with support for authentication, roles (user / admin), registration, editing, and viewing tasks. The project implements basic logic for managing users and tasks through HTML templates and an SQLite database.
 
-📁 Структура проєкту
+📁 Project Structure
 
 C:\PythonProjects\Flask/
-│── .venv/                 # Віртуальне середовище
-│── static/                # Статичні файли (CSS, JS, зображення)
-│   ├── css/               # CSS стилі
-│   │   └── style.css      # Основний файл стилів                # Статичні файли (CSS, JS, зображення)
-│── templates/             # HTML-шаблони
+│── .venv/                 # Virtual environment
+│── static/                # Static files (CSS, JS, images)
+│   ├── css/               # CSS styles
+│   │   └── style.css      # Main stylesheet
+│── templates/             # HTML templates
 │   ├── login.html          
 │   ├── register.html
 │   ├── tasks.html
@@ -20,54 +20,45 @@ C:\PythonProjects\Flask/
 │   ├── edit_task.html
 │   ├── index.html
 │   └── welcome.html
-│── app.py                 # Основний Flask-додаток
-│── database.py            # Робота з SQLite
-│── database.db            # SQLite-база даних
-│── .env                   # Конфігурація середовища
-│── .gitignore             # Ігнорування файлів для Git
-│── requirements.txt       # Залежності
+│── app.py                 # Main Flask application
+│── database.py            # SQLite database handling
+│── database.db            # SQLite database file
+│── .env                   # Environment configuration
+│── .gitignore             # Git ignore file
+│── requirements.txt       # Dependencies
 
-⚙️ Установка
+⚙️ Installation
 
-Створити віртуальне середовище:
+Create a virtual environment:
 
 python -m venv .venv
 source .venv/bin/activate  # або .venv\Scripts\activate на Windows
 
-Встановити залежності:
+Install dependencies:
 
 pip install -r requirements.txt
-
-Запустити додаток:
-
+Run the application:
 flask run
 
-🔐 Авторизація
+🔐 Authentication
 
-Користувач вводить username і password.
+The user enters a username and password.
+If the role in the database is admin, redirect to /admin_board.
+If the role is user, redirect to /tasks.
+User data is stored in the session.
 
-Якщо роль у базі — admin, перенаправлення на /admin_board.
+🧠 Database Structure
 
-Якщо роль — user, перенаправлення на /tasks.
-
-Дані зберігаються в session.
-
-🧠 Структура бази даних
-
-Таблиця users: id, username, password, role
-
-Таблиця tasks: id, user_id, description, created_at, due_at, status, priority, done, FOREIGN KEY
+Users table: id, username, password, role
+Tasks table: id, user_id, description, created_at, due_at, status, priority, done, FOREIGN KEY (user_id → users.id)
 
 
-🛡️ Рекомендації
+🛡️ Recommendations
+Use werkzeug.security for password hashing.
+Add CSRF protection via Flask-WTF.
+Create decorators for role verification (@admin_required, @login_required).
 
-Використовувати werkzeug.security для хешування паролів.
-
-Додати CSRF-захист через Flask-WTF.
-
-Створити декоратори для перевірки ролей (@admin_required, @login_required).
-
-📌 Автор
-
-Розроблено Віталієм Івановим — Flask-розробником з фокусом на чисту архітектуру, симетрію шаблонів і maintainability.
+📌 Author
+Developed by Vitalii Ivanov — Flask developer focused on clean architecture, template symmetry, and maintainability.
+Supported by AI assistance.
 Підтримка ШІ.
