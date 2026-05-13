@@ -19,7 +19,7 @@
 
      <div class="delete_account">
          <form action="{{ url_for('delete_account') }}" method="POST"
-               onsubmit="return confirm('Вм впевнені, що хочете видалити акаунт?')">
+               onsubmit="return confirm('Ви впевнені, що хочете видалити акаунт?')">
              <button type="submit" style="color: red;">Видалити акаунт</button>
          </form>
      </div>
@@ -34,7 +34,7 @@
                 <option value="done" {% if status =='done' %}selected{% endif %}>Виконані</option>
                 <option value="not_done" {% if status =='not_done' %}selected{% endif %}>Невиконані</option>
             </select>
-            <label for="priority">Пріорітет:</label>
+            <label for="priority">Пріоритет:</label>
             <select name="priority" id="priority" onchange="this.form.submit()">
                 <option value="">Всі</option>
                 {% for key, value in priority_map.items() %}
@@ -61,7 +61,9 @@
                     {% endif %}
                 </form><br>
                 <a href="{{ url_for('edit_task', task_id=task[0]) }}" style="color:green; margin-right:60px;">Редагувати</a>
-                <a href="{{ url_for('delete_task', task_id=task[0]) }}" style="color: red">Видалити</a>
+                <form action="{{ url_for('delete_task', task_id=task[0]) }}" method="POST" style="display:inline;">
+                    <button type="submit" style="color: red;">Видалити</button>
+                </form>
             </li><br>
         {% endfor %}
     </ol>

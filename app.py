@@ -3,10 +3,9 @@
 from flask import Flask, redirect, render_template, request, url_for, session, flash
 from dotenv import load_dotenv
 from datetime import datetime
+from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import database as db
-
-from pprint import pprint
 
 load_dotenv()
 
@@ -34,7 +33,16 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = db.get_user(username)
-        if user and user[2] == password:
+        password_ok = False
+        if user:
+            try:
+                password_ok = check_password_hash(user[2], password)
+            except ValueError:
+                password_ok = user[2] == password
+            if not password_ok:
+                password_ok = user[2] == password
+
+        if user and password_ok:
             session['username'] = username
             session['role'] = user[4]
             if session ['role'] == 'admin':
@@ -48,10 +56,12 @@ def login():
 #
 @app.route("/admin")
 def admin_board():
+    if "username" not in session or session.get("role") != "admin":
+        flash("Доступ заборонено")
+        return redirect(url_for("login"))
+
     users = db.get_all_users()
     tasks = db.get_all_tasks()
-    pprint(users)
-    pprint(tasks)
 
     tasks_by_users = {}
 
@@ -60,7 +70,6 @@ def admin_board():
         for task in tasks:
             list_tasks.append(task) if task[1] == user[0] else None
         tasks_by_users.setdefault(user[0], list_tasks)
-    pprint(tasks_by_users)
     return render_template('admin.html', users=users, tasks=tasks_by_users)
 
 #
@@ -69,11 +78,12 @@ def register():
     message = None
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password']
+        password = generate_password_hash(request.form['password'])
         age = request.form['age']
         try:
             db.add_user(username, password, age)
             session['username'] = username
+            session['role'] = 'user'
             flash("Реєстрація пройшла успішно")
             return redirect(url_for('tasks'))
         except Exception as e:
@@ -105,7 +115,7 @@ def tasks():
     if request.method == 'POST':
         task_id = request.form['task_id']
         done_value = 'done' in request.form
-        db.toggle_task_done(task_id, done_value)
+        db.toggle_task_done(task_id, done_value, user_id)
 
     status = request.args.get('status')
     priority = request.args.get('priority')
@@ -120,9 +130,13 @@ def tasks():
         priority=priority)
 
 #
-@app.route("/delete_task/<int:task_id>")
+@app.route("/delete_task/<int:task_id>", methods=['POST'])
 def delete_task(task_id):
-    db.delete_task(task_id)
+    if "username" not in session:
+        return redirect(url_for('login'))
+
+    user = db.get_user(session['username'])
+    db.delete_task(task_id, user[0])
     return redirect(url_for('tasks'))
 
 #
@@ -149,12 +163,18 @@ def edit_task(task_id):
     if "username" not in session:
         return redirect(url_for('login'))
 
-    task = db.get_task(task_id)
+    user = db.get_user(session['username'])
+    user_id = user[0]
+    task = db.get_task(task_id, user_id)
+    if task is None:
+        flash("Задачу не знайдено")
+        return redirect(url_for('tasks'))
+
     if request.method == 'POST':
         description = request.form['description']
         due_at = request.form['due_at']
         priority = request.form['priority']
-        db.update_task(task_id, description, due_at, priority)
+        db.update_task(task_id, description, due_at, priority, user_id)
         flash("Задача оновлена")
         return redirect(url_for('tasks'))
     return render_template('edit_task.html', task=task, priority_map=priority_map)
