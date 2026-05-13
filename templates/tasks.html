@@ -17,30 +17,36 @@
         {% endif %}
     {% endwith %}
 
-     <div class="delete_account">
-         <form action="{{ url_for('delete_account') }}" method="POST"
-               onsubmit="return confirm('Ви впевнені, що хочете видалити акаунт?')">
-             <button type="submit" style="color: red;">Видалити акаунт</button>
-         </form>
-     </div>
+    <div class="page-header">
+        <h1>Список завдань {{ username }}</h1>
+        <div class="delete_account">
+            <form action="{{ url_for('delete_account') }}" method="POST"
+                  onsubmit="return confirm('Ви впевнені, що хочете видалити акаунт?')">
+                <button type="submit">Видалити акаунт</button>
+            </form>
+        </div>
+    </div>
 
-    <div style="display: flex; align-items: center; gap:20px;" method="POST">
-        <h1 style="margin: 0;">Список завдань {{ username }}</h1>
-        <a href="{{ url_for('add_task') }}">Додати завдання</a>
-        <form method="GET" action="{{ url_for('tasks') }}" style="display:inline">
-            <label for="status">Фільтр по статусу</label>
-            <select name="status" id="status" onchange="this.form.submit()">
-                <option value="">Всі</option>
-                <option value="done" {% if status =='done' %}selected{% endif %}>Виконані</option>
-                <option value="not_done" {% if status =='not_done' %}selected{% endif %}>Невиконані</option>
-            </select>
-            <label for="priority">Пріоритет:</label>
-            <select name="priority" id="priority" onchange="this.form.submit()">
-                <option value="">Всі</option>
-                {% for key, value in priority_map.items() %}
-                <option value="{{ key }}" {% if priority == key|string %}selected{% endif %}>{{ value }}</option>
-                {% endfor %}
-            </select>
+    <div class="toolbar">
+        <a class="button" href="{{ url_for('add_task') }}">Додати завдання</a>
+        <form method="GET" action="{{ url_for('tasks') }}" class="filters-form">
+            <div class="field">
+                <label for="status">Статус</label>
+                <select name="status" id="status" onchange="this.form.submit()">
+                    <option value="">Всі</option>
+                    <option value="done" {% if status =='done' %}selected{% endif %}>Виконані</option>
+                    <option value="not_done" {% if status =='not_done' %}selected{% endif %}>Невиконані</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="priority">Пріоритет</label>
+                <select name="priority" id="priority" onchange="this.form.submit()">
+                    <option value="">Всі</option>
+                    {% for key, value in priority_map.items() %}
+                    <option value="{{ key }}" {% if priority == key|string %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </form>
     </div>
     <ol style="margin-top:20px;">
@@ -55,14 +61,14 @@
                     <input type="checkbox" name="done" onchange="this.form.submit()"
                         {% if task[6] %}checked{% endif %}>
                     {% if task[6] %}
-                        <span style="color:lightgreen;">Задача виконана</span>
+                        <span class="task-done">Задача виконана</span>
                     {% else %}
-                        <span style="color:yellow;">Задача не виконана</span>
+                        <span class="task-not-done">Задача не виконана</span>
                     {% endif %}
                 </form><br>
                 <a href="{{ url_for('edit_task', task_id=task[0]) }}" style="color:green; margin-right:60px;">Редагувати</a>
                 <form action="{{ url_for('delete_task', task_id=task[0]) }}" method="POST" style="display:inline;">
-                    <button type="submit" style="color: red;">Видалити</button>
+                    <button type="submit" class="button-danger-outline">Видалити</button>
                 </form>
             </li><br>
         {% endfor %}

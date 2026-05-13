@@ -2,7 +2,10 @@ Flask Task Manager
 
 Description
 
-This is a Flask web application for task management with support for authentication, roles (user / admin), registration, editing, and viewing tasks. The project implements basic logic for managing users and tasks through HTML templates and an SQLite database.
+This is a Flask web application for task management with support for authentication,
+    roles (user / admin), registration, editing, and viewing tasks.
+The project implements basic logic for managing users and tasks through HTML templates
+    and an SQLite database.
 
 📁 Project Structure
 
