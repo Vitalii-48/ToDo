@@ -3,7 +3,7 @@
 from flask import Flask, redirect, render_template, request, url_for, session, flash
 from dotenv import load_dotenv
 from datetime import datetime
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 import os
 import database as db
 
@@ -11,7 +11,6 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('TD_SECRET_KEY')
-db.init_database()
 
 #
 @app.route('/')
@@ -78,7 +77,7 @@ def register():
     message = None
     if request.method == 'POST':
         username = request.form['username']
-        password = generate_password_hash(request.form['password'])
+        password = (request.form['password'])
         age = request.form['age']
         try:
             db.add_user(username, password, age)
@@ -200,5 +199,8 @@ def admin_delete_task(task_id):
     db.delete_task(task_id)
     flash("Задача видалена")
     return redirect(url_for("admin_board"))
+
+
 if __name__ == "__main__":
+    db.init_database()
     app.run(debug=True)

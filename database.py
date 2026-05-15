@@ -2,7 +2,7 @@
 
 import sqlite3
 
-DB_NAME = "database.db"
+DB_NAME = "todo.db"
 
 def init_database():
     conn = sqlite3.connect(DB_NAME)
@@ -38,7 +38,8 @@ def init_database():
 def add_user(username, password, age):
     conn = sqlite3.connect(DB_NAME)
     curs = conn.cursor()
-    curs.execute("INSERT INTO users (username, password, age) VALUES (?, ?, ?)", (username, password, age))
+    next_id = get_next_id('users')
+    curs.execute("INSERT INTO users (id, username, password, age) VALUES (?, ?, ?, ?)", (next_id, username, password, age))
     conn.commit()
     conn.close()
 #
@@ -51,20 +52,21 @@ def get_user(username):
     return user
 
 #
-def delete_user(username):
-    conn = sqlite3.connect(DB_NAME)
-    curs = conn.cursor()
-    curs.execute("DELETE FROM tasks WHERE user_id = ?", (username,))
-    curs.execute("DELETE FROM users WHERE id = ?", (username,))
-    conn.commit()
-    conn.close()
+def delete_user(user_id):
+    with sqlite3.connect(DB_NAME, timeout=15) as conn:
+        curs = conn.cursor()
+        curs.execute("DELETE FROM tasks WHERE user_id = ?", (user_id,))
+        curs.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        conn.commit()
+
 
 #
 def add_task(user_id, description, created_at, due_at, priority):
     conn = sqlite3.connect(DB_NAME)
     curs = conn.cursor()
-    curs.execute("""INSERT INTO tasks (user_id, description, created_at, due_at, priority, done)
-                    VALUES (?, ?, ?, ?, ?, 0)""", (user_id, description, created_at, due_at, priority))
+    next_id = get_next_id('tasks')
+    curs.execute("""INSERT INTO tasks (id, user_id, description, created_at, due_at, priority, done)
+                    VALUES (?, ?, ?, ?, ?, ?, 0)""", (next_id, user_id, description, created_at, due_at, priority))
     conn.commit()
     conn.close()
 
@@ -143,7 +145,7 @@ def get_filtr_tasks(user_id, status=None, priority=None):
 
 #
 def get_all_users():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM users WHERE role = 'user'")
     users = cursor.fetchall()
@@ -152,9 +154,22 @@ def get_all_users():
 
 #
 def get_all_tasks():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM tasks")
     tasks = cursor.fetchall()
     conn.close()
     return tasks
+
+def get_next_id(table):
+    conn = sqlite3.connect(DB_NAME)
+    curs = conn.cursor()
+    curs.execute(f"SELECT id FROM {table} ORDER BY id")
+    ids = [row[0] for row in curs.fetchall()]
+    conn.close()
+    next_id = 1
+    for i in ids:
+        if next_id < i:
+            break
+        next_id += 1
+    return next_id
