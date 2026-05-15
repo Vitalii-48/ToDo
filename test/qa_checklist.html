@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Manual QA — ToDo Flask App</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f5f5f5; color: #222; padding: 24px; max-width: 860px; margin: 0 auto; }
+h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+.subtitle { font-size: 14px; color: #666; margin-bottom: 20px; }
+.qa-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+.progress-row { display: flex; align-items: center; gap: 12px; }
+.progress-bar-wrap { width: 160px; height: 8px; background: #ddd; border-radius: 4px; overflow: hidden; }
+#pbar { height: 100%; background: #16803c; width: 0%; transition: width 0.3s; }
+#pcnt { font-size: 14px; font-weight: 600; color: #333; min-width: 50px; }
+.reset-btn { font-size: 13px; padding: 6px 12px; border: 1px solid #bbb; border-radius: 5px; background: #fff; cursor: pointer; }
+.reset-btn:hover { background: #eee; }
+.section { background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+.section-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; user-select: none; }
+.section-header:hover { background: #f9f9f9; }
+.section-name { font-size: 15px; font-weight: 600; flex: 1; }
+.badge { font-size: 12px; padding: 2px 9px; border-radius: 10px; font-weight: 500; }
+.badge-gray { background: #eee; color: #555; }
+.badge-done { background: #dcfce7; color: #15803d; }
+.chevron { font-size: 18px; color: #999; transition: transform 0.2s; display: inline-block; line-height: 1; }
+.chevron.open { transform: rotate(180deg); }
+.section-body { display: none; padding: 0 16px 12px; }
+.section-body.open { display: block; }
+.check-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f0f0f0; }
+.check-item:last-child { border-bottom: none; }
+.check-item input[type=checkbox] { margin-top: 3px; flex-shrink: 0; width: 16px; height: 16px; cursor: pointer; }
+.check-text { font-size: 14px; line-height: 1.5; flex: 1; }
+.check-text.checked { color: #aaa; text-decoration: line-through; }
+.tag { font-size: 11px; padding: 2px 7px; border-radius: 4px; font-weight: 600; flex-shrink: 0; margin-top: 2px; white-space: nowrap; }
+.tag-ok  { background: #dcfce7; color: #15803d; }
+.tag-err { background: #fee2e2; color: #b91c1c; }
+.tag-sec { background: #ede9fe; color: #5b21b6; }
+.tag-ux  { background: #fef3c7; color: #92400e; }
+</style>
+</head>
+<body>
+
+<div class="qa-header">
+  <div>
+    <h1>Manual QA &mdash; ToDo Flask App</h1>
+    <p class="subtitle">Відкрийте цей файл у браузері, запустіть застосунок і проходьте кейси по черзі</p>
+  </div>
+  <div class="progress-row">
+    <span style="font-size:13px;color:#666;">Прогрес</span>
+    <div class="progress-bar-wrap"><div id="pbar"></div></div>
+    <span id="pcnt">0 / 0</span>
+    <button class="reset-btn" onclick="resetAll()">&#8635; Скинути</button>
+  </div>
+</div>
+
+<div id="sections"></div>
+
+<script>
+var data = [
+  {
+    id: "auth",
+    name: "Аутентифікація та авторизація",
+    items: [
+      { tag: "ok",  text: "Реєстрація нового користувача з коректними даними — редирект до /tasks, flash «Реєстрація пройшла успішно»" },
+      { tag: "err", text: "Реєстрація з уже існуючим логіном — повідомлення «Користувач вже існує», сторінка не падає" },
+      { tag: "err", text: "Реєстрація з порожніми полями — форма не відправляється або є зрозуміле повідомлення" },
+      { tag: "ok",  text: "Вхід із правильними логіном/паролем — редирект до /tasks (для user) або /admin (для admin)" },
+      { tag: "err", text: "Вхід з неправильним паролем — повідомлення «Неправильний логін або пароль», без редиректу" },
+      { tag: "err", text: "Вхід з неіснуючим логіном — та сама помилка, без падіння" },
+      { tag: "sec", text: "Відкрити /tasks без сесії — редирект на /login" },
+      { tag: "sec", text: "Відкрити /add_task без сесії — редирект на /login" },
+      { tag: "sec", text: "Відкрити /admin без сесії — редирект на /login" },
+      { tag: "sec", text: "Відкрити /admin від імені звичайного user — flash «Доступ заборонено», редирект на /login" }
+    ]
+  },
+  {
+    id: "tasks",
+    name: "Управління завданнями",
+    items: [
+      { tag: "ok",  text: "Додати завдання з описом, датою та пріоритетом — завдання з'являється у списку" },
+      { tag: "err", text: "Спробувати додати завдання без опису або дати — форма показує помилку валідації" },
+      { tag: "ok",  text: "Позначити завдання як виконане через чекбокс — статус змінюється (авто-submit форми)" },
+      { tag: "ok",  text: "Зняти позначку виконання — статус повертається до «не виконано»" },
+      { tag: "ok",  text: "Відредагувати завдання: змінити опис, дату, пріоритет — зміни збережено, flash «Задача оновлена»" },
+      { tag: "err", text: "Редагувати завдання з порожнім описом — форма не відправляється" },
+      { tag: "ok",  text: "Видалити завдання — завдання зникає зі списку одразу" },
+      { tag: "sec", text: "Спробувати видалити чуже завдання через /delete_task/{id} — відмова або ігнорування (user_id перевірка)" },
+      { tag: "sec", text: "Спробувати редагувати чуже завдання через /edit_task/{id} — редирект, flash «Задачу не знайдено»" }
+    ]
+  },
+  {
+    id: "filter",
+    name: "Фільтрація завдань",
+    items: [
+      { tag: "ok",  text: "Фільтр «Статус: Виконані» — показуються лише виконані завдання" },
+      { tag: "ok",  text: "Фільтр «Статус: Невиконані» — показуються лише невиконані" },
+      { tag: "ok",  text: "Фільтр «Пріоритет: Низький / Середній / Високий» — відповідна фільтрація" },
+      { tag: "ok",  text: "Комбінований фільтр (статус + пріоритет) — результат відповідає обом умовам" },
+      { tag: "ok",  text: "Скинути фільтри до «Всі» — відображаються всі завдання" },
+      { tag: "ux",  text: "Після зміни фільтра вибрані значення залишаються у select (selected атрибут)" },
+      { tag: "ux",  text: "При відсутності завдань за фільтром — порожній список без помилок" }
+    ]
+  },
+  {
+    id: "account",
+    name: "Акаунт користувача",
+    items: [
+      { tag: "ok",  text: "Натиснути «Видалити акаунт» — з'являється підтвердження браузера (confirm dialog)" },
+      { tag: "ok",  text: "Підтвердити видалення — акаунт і всі завдання видаляються, сесія очищається, редирект на /" },
+      { tag: "ok",  text: "Скасувати видалення — нічого не відбувається, залишаємося на сторінці" },
+      { tag: "sec", text: "Після видалення акаунту перейти на /tasks — редирект на /login" }
+    ]
+  },
+  {
+    id: "admin",
+    name: "Адмін-панель",
+    items: [
+      { tag: "ok",  text: "Відображається список усіх user (не адміни)" },
+      { tag: "ok",  text: "Для кожного user відображається список його завдань" },
+      { tag: "ux",  text: "Якщо у user немає завдань — відображається «Задач поки немає»" },
+      { tag: "ok",  text: "Адмін видаляє завдання user — задача зникає зі списку в адмін-панелі" },
+      { tag: "ok",  text: "Адмін видаляє user — user і всі його завдання зникають" },
+      { tag: "sec", text: "POST на /admin/delete_user/{id} від звичайного user — flash «Доступ заборонено», редирект" },
+      { tag: "sec", text: "POST на /admin/delete_task/{id} від звичайного user — flash «Доступ заборонено», редирект" }
+    ]
+  },
+  {
+    id: "nav",
+    name: "Навігація та UX",
+    items: [
+      { tag: "ok",  text: "Головна сторінка / доступна без входу, відображає welcome з посиланнями на login і register" },
+      { tag: "ok",  text: "Посилання «Назад до списку» у формах add_task і edit_task — повертає на /tasks" },
+      { tag: "ux",  text: "Flash-повідомлення відображаються після реєстрації та редагування завдань" },
+      { tag: "ux",  text: "Пріоритет завдання відображається як текст (Низький / Середній / Високий), не як число" },
+      { tag: "ux",  text: "Статус завдання — «Задача виконана» зеленим, «Задача не виконана» оранжевим" },
+      { tag: "ok",  text: "Перевірити сторінку /index (home) — відображається список демо-завдань" }
+    ]
+  },
+  {
+    id: "edge",
+    name: "Крайні випадки (Edge cases)",
+    items: [
+      { tag: "err", text: "Відкрити /edit_task/99999 (неіснуючий ID) — flash «Задачу не знайдено», редирект на /tasks" },
+      { tag: "err", text: "Ввести дату у минулому при додаванні завдання — чи є валідація? (поточна версія може дозволяти)" },
+      { tag: "err", text: "Опис завдання з дуже довгим текстом (більше 500 символів) — зберігається та відображається коректно" },
+      { tag: "sec", text: "Ввести у поле опису SQL ін'єкцію: '; DROP TABLE tasks; -- → зберігається як текст" },
+      { tag: "sec", text: "Ввести у поле опису XSS: script alert(1) script → Jinja2 екранує, скрипт не виконується" },
+      { tag: "ux",  text: "Декілька швидких кліків на чекбокс «виконано» — стан стабільний, без дублювання запитів" }
+    ]
+  }
+];
+
+var STORAGE_KEY = "qa_todo_state_v1";
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveState(s) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch(e) {}
+}
+function buildKey(sid, idx) { return sid + "__" + idx; }
+
+function tagLabel(t) {
+  var map = { ok: "happy path", err: "негативний", sec: "безпека", ux: "UX" };
+  return map[t] || t;
+}
+function tagClass(t) {
+  var map = { ok: "tag-ok", err: "tag-err", sec: "tag-sec", ux: "tag-ux" };
+  return map[t] || "tag-ok";
+}
+
+function renderAll() {
+  var state = loadState();
+  var container = document.getElementById("sections");
+  container.innerHTML = "";
+
+  for (var s = 0; s < data.length; s++) {
+    var section = data[s];
+    var done = 0;
+    for (var i = 0; i < section.items.length; i++) {
+      if (state[buildKey(section.id, i)]) done++;
+    }
+    var total = section.items.length;
+    var allDone = done === total;
+
+    var div = document.createElement("div");
+    div.className = "section";
+
+    var headerDiv = document.createElement("div");
+    headerDiv.className = "section-header";
+    headerDiv.setAttribute("data-id", section.id);
+    headerDiv.onclick = (function(id) { return function() { toggleSection(id); }; })(section.id);
+
+    var nameSpan = document.createElement("span");
+    nameSpan.className = "section-name";
+    nameSpan.textContent = section.name;
+
+    var badge = document.createElement("span");
+    badge.className = "badge " + (allDone ? "badge-done" : "badge-gray");
+    badge.id = "badge-" + section.id;
+    badge.textContent = allDone ? "\u2713 \u0413\u043e\u0442\u043e\u0432\u043e" : done + " / " + total;
+
+    var chev = document.createElement("span");
+    chev.className = "chevron";
+    chev.id = "chev-" + section.id;
+    chev.innerHTML = "&#8964;";
+
+    headerDiv.appendChild(nameSpan);
+    headerDiv.appendChild(badge);
+    headerDiv.appendChild(chev);
+
+    var bodyDiv = document.createElement("div");
+    bodyDiv.className = "section-body";
+    bodyDiv.id = "body-" + section.id;
+
+    for (var j = 0; j < section.items.length; j++) {
+      var item = section.items[j];
+      var key = buildKey(section.id, j);
+      var checked = !!state[key];
+
+      var row = document.createElement("div");
+      row.className = "check-item";
+
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.id = key;
+      cb.checked = checked;
+      cb.setAttribute("data-sid", section.id);
+      cb.setAttribute("data-idx", j);
+      cb.onchange = (function(sid, idx) {
+        return function() { toggle(sid, idx); };
+      })(section.id, j);
+
+      var label = document.createElement("label");
+      label.htmlFor = key;
+      label.className = "check-text" + (checked ? " checked" : "");
+      label.textContent = item.text;
+
+      var tag = document.createElement("span");
+      tag.className = "tag " + tagClass(item.tag);
+      tag.textContent = tagLabel(item.tag);
+
+      row.appendChild(cb);
+      row.appendChild(label);
+      row.appendChild(tag);
+      bodyDiv.appendChild(row);
+    }
+
+    div.appendChild(headerDiv);
+    div.appendChild(bodyDiv);
+    container.appendChild(div);
+  }
+
+  updateProgress();
+}
+
+function toggleSection(id) {
+  var body = document.getElementById("body-" + id);
+  var chev = document.getElementById("chev-" + id);
+  if (body.classList.contains("open")) {
+    body.classList.remove("open");
+    chev.classList.remove("open");
+  } else {
+    body.classList.add("open");
+    chev.classList.add("open");
+  }
+}
+
+function toggle(sid, idx) {
+  var key = buildKey(sid, idx);
+  var state = loadState();
+  state[key] = !state[key];
+  saveState(state);
+
+  var cb = document.getElementById(key);
+  var label = cb ? cb.nextSibling : null;
+  if (label) {
+    if (state[key]) label.classList.add("checked");
+    else label.classList.remove("checked");
+  }
+
+  var section = null;
+  for (var s = 0; s < data.length; s++) {
+    if (data[s].id === sid) { section = data[s]; break; }
+  }
+  if (section) {
+    var done = 0;
+    for (var i = 0; i < section.items.length; i++) {
+      if (state[buildKey(sid, i)]) done++;
+    }
+    var total = section.items.length;
+    var allDone = done === total;
+    var badge = document.getElementById("badge-" + sid);
+    if (badge) {
+      badge.textContent = allDone ? "\u2713 \u0413\u043e\u0442\u043e\u0432\u043e" : done + " / " + total;
+      badge.className = "badge " + (allDone ? "badge-done" : "badge-gray");
+    }
+  }
+
+  updateProgress();
+}
+
+function updateProgress() {
+  var state = loadState();
+  var total = 0, done = 0;
+  for (var s = 0; s < data.length; s++) {
+    total += data[s].items.length;
+    for (var i = 0; i < data[s].items.length; i++) {
+      if (state[buildKey(data[s].id, i)]) done++;
+    }
+  }
+  document.getElementById("pbar").style.width = (total ? Math.round(done / total * 100) : 0) + "%";
+  document.getElementById("pcnt").textContent = done + " / " + total;
+}
+
+function resetAll() {
+  if (!confirm("Скинути всі чекбокси?")) return;
+  saveState({});
+  renderAll();
+}
+
+renderAll();
+</script>
+</body>
+</html>
