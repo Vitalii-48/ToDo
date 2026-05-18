@@ -23,9 +23,11 @@ C:\PythonProjects\Flask/
 │   ├── edit_task.html
 │   ├── index.html
 │   └── welcome.html
+│── test/                  # Automated tests
+│   └── test_app.py        # Pytest tests for pages, login and registration
 │── app.py                 # Main Flask application
 │── database.py            # SQLite database handling
-│── database.db            # SQLite database file
+│── todo.db                # SQLite database file
 │── .env                   # Environment configuration
 │── .gitignore             # Git ignore file
 │── requirements.txt       # Dependencies
@@ -42,6 +44,34 @@ Install dependencies:
 pip install -r requirements.txt
 Run the application:
 flask run
+
+🧪 Testing
+
+The project uses pytest for automated testing.
+Tests are stored in the test/ folder.
+
+Run all tests:
+
+pytest
+
+Run tests with detailed output:
+
+pytest -v
+
+Current tests check:
+
+- public pages: /, /login, /register, /index
+- redirects from protected pages without login: /tasks, /add_task, /admin
+- successful login
+- failed login
+- new user registration
+- duplicate user registration
+
+During tests, the application uses a separate temporary database:
+
+test_todo.db
+
+This helps avoid changing the main local database todo.db while running tests.
 
 🔐 Authentication
 
