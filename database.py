@@ -53,11 +53,12 @@ def get_user(username):
 
 #
 def delete_user(user_id):
-    with sqlite3.connect(DB_NAME, timeout=15) as conn:
-        curs = conn.cursor()
-        curs.execute("DELETE FROM tasks WHERE user_id = ?", (user_id,))
-        curs.execute("DELETE FROM users WHERE id = ?", (user_id,))
-        conn.commit()
+    conn = sqlite3.connect(DB_NAME, timeout=15)
+    curs = conn.cursor()
+    curs.execute("DELETE FROM tasks WHERE user_id = ?", (user_id,))
+    curs.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
 
 
 #
